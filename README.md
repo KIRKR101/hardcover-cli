@@ -1,142 +1,99 @@
 # Hardcover CLI
 
-An unofficial command-line tool for managing your [Hardcover](https://hardcover.app) library; list books, log progress, check stats, track goals, and export your reading history.
+An unofficial command-line tool for managing your [Hardcover](https://hardcover.app) library — list books, log progress, check stats, track goals, and export your reading history.
 
 ## Requirements
 
-- Python 3.8+
-- `requests`
-
-```bash
-pip install requests
-```
+- Go 1.25+ (or a pre-built binary)
+- A Hardcover API token
 
 ## Setup
 
-Get your API token from [Hardcover's account settings](https://hardcover.app/account/api), then run:
+Get an API token from [Hardcover's account settings](https://hardcover.app/account/api), then either:
 
 ```bash
-python3 hardcover.py setup
+go install github.com/KIRKR101/hardcover-cli@latest
+hardcover setup
 ```
 
-You'll be prompted to paste your token, which is saved to `~/.hardcover.json` with `600` permissions.
+…or build from source:
 
-Alternatively, set the `HARDCOVER_TOKEN` environment variable and skip `setup` entirely.
+```bash
+git clone https://github.com/KIRKR101/hardcover-cli
+cd hardcover-cli
+go build -o hardcover .
+./hardcover setup
+```
+
+The token is stored in `~/.hardcover.json` with `0600` permissions. Alternatively, set `HARDCOVER_TOKEN` and skip `setup`.
 
 ## Commands
 
-### `whoami`
-
-Show your Hardcover user ID, username, and book count.
-
-```bash
-python3 hardcover.py whoami
-```
-
-### `library`
-
-List books in your library.
-
-```bash
-python3 hardcover.py library
-python3 hardcover.py library --status reading
-python3 hardcover.py library --status want -l 50 -o 25
-```
-
-| Flag | Description |
+| Command | Description |
 |---|---|
-| `-s, --status` | Filter by `want`, `reading`, `read`, `paused`, `dnf`, `ignored` |
-| `-l, --limit` | Max books to show (default: 25) |
-| `-o, --offset` | Pagination offset |
-| `--json` | Output raw JSON |
+| `hardcover whoami` | Show your Hardcover user info |
+| `hardcover library [-s status] [-l limit] [-o offset]` | List books in your library |
+| `hardcover stats` | Show reading statistics and active goals |
+| `hardcover progress` | Show current reading progress |
+| `hardcover search <query> [-l limit]` | Search for books on Hardcover |
+| `hardcover goals [--all]` | Show reading goals |
+| `hardcover log [book] [--id id] [--pages n] [--percent n] [--status s] [--rating r]` | Log progress, status, or rating |
+| `hardcover export [-o file]` | Export reading journal to CSV |
+| `hardcover daily [-d days]` | Show daily reading log |
+| `hardcover completion <bash\|zsh\|fish\|powershell>` | Generate shell completions |
 
-### `stats`
+Most commands accept `--json` for raw JSON output suitable for piping into `jq`.
 
-Show aggregate reading statistics and active goals.
+### `log` in detail
 
-```bash
-python3 hardcover.py stats
+`hardcover log` matches a book by fuzzy title search, or by `--id` if you already know the `user_book` id. If multiple books match the title, an interactive picker launches (in TTY mode) with keyboard navigation:
+
+```
+> Select a book
+  1. The Stranger                 — Albert Camus
+  2. The Myth of Sisyphus         — Albert Camus
+  3. Stranger in a Strange Land   — Robert A. Heinlein
 ```
 
-### `progress`
+`↑`/`↓` to move, `/` to filter, `enter` to select, `esc`/`ctrl-c` to cancel.
 
-Show current page progress for books marked "Currently Reading".
-
-```bash
-python3 hardcover.py progress
-```
-
-### `search`
-
-Search Hardcover's book database.
+Provide at least one of `--pages`, `--percent`, `--status`, or `--rating`. Examples:
 
 ```bash
-python3 hardcover.py search "the unbearable lightness of being"
-python3 hardcover.py search "kafka" -l 5
+hardcover log "the stranger" --status reading
+hardcover log "the stranger" --pages 120
+hardcover log "the stranger" --percent 75
+hardcover log "the stranger" --rating 4.5
+hardcover log --id 123456 --status read --rating 5
 ```
-
-### `goals`
-
-Show reading goals.
-
-```bash
-python3 hardcover.py goals
-python3 hardcover.py goals --all   # include archived goals
-```
-
-### `log`
-
-Log progress, update status, or rate a book. Matches by fuzzy title search (falls back to a disambiguation list if multiple books match) or a direct `user_book` ID.
-
-```bash
-python3 hardcover.py log "the stranger" --status reading
-python3 hardcover.py log "the stranger" --pages 120
-python3 hardcover.py log "the stranger" --percent 75
-python3 hardcover.py log "the stranger" --rating 4.5
-python3 hardcover.py log --id 123456 --status read --rating 5
-```
-
-| Flag | Description |
-|---|---|
-| `--id` | `user_book` ID (skips title search) |
-| `--pages` | Cumulative pages read |
-| `--percent` | Progress as a percentage (0–100); converted to pages using the book's page count |
-| `--status` | `want`, `reading`, `read`, `paused`, `dnf`, `ignored` |
-| `--rating` | 0–5, supports halves |
-
-### `export`
-
-Export your reading journal (progress events) to CSV, with a daily pages-read summary printed to the terminal.
-
-```bash
-python3 hardcover.py export
-python3 hardcover.py export -o reading_log_2026.csv
-```
-
-### `daily`
-
-Show a daily reading log with pages read per book and cumulative progress. By default shows the last 7 days.
-
-```bash
-python3 hardcover.py daily
-python3 hardcover.py daily -d 14
-python3 hardcover.py daily --json
-```
-
-| Flag | Description |
-|---|---|
-| `-d, --days` | Number of days to show (default: 7) |
-| `--json` | Output raw JSON |
 
 ## JSON output
 
-`whoami`, `library`, `stats`, `progress`, `search`, and `goals` all support `--json` for scripting:
+For scripting, most commands support `--json`:
 
 ```bash
-python3 hardcover.py library --status read --json | jq '.[].book.title'
+hardcover library --status read --json | jq '.[].book.title'
 ```
+
+## Flags
+
+- `--no-color` — disable colored output (also respects `NO_COLOR`)
+- `--json` — output raw JSON to stdout (per-command)
+- `--version` — print the version
+
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | Success |
+| 1 | Generic error (bad input, validation, JSON decode failure) |
+| 2 | Auth/config error (no token, 401/403 from the API) |
+| 3 | Network error (timeout, connection refused, 5xx) |
+
+`--json` mode keeps the data on stdout and any spinner status on stderr, so piping doesn't get ANSI/control codes mixed into the JSON.
 
 ## Notes
 
-- Config is stored at `~/.hardcover.json`.
-- All commands respect `HARDCOVER_TOKEN` as a fallback if no config file exists.
+- Config: `~/.hardcover.json`
+- API: `https://api.hardcover.app/v1/graphql`
+- Ctrl-C cancels in-flight HTTP requests, not just the UI.
