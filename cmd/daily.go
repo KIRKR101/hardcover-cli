@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -82,17 +84,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 			var resp struct {
 				UserBooks []bookRow `json:"user_books"`
 			}
-			if gerr := c.GQL(ctx, `
-query ($userId: Int!, $limit: Int!, $offset: Int!) {
-  user_books(
-    where: { user_id: { _eq: $userId } }
-    limit: $limit
-    offset: $offset
-  ) {
-    book { id title pages }
-  }
-}
-`, map[string]any{
+			if gerr := c.GQL(ctx, api.QueryBookTitlesAndPages, map[string]any{
 				"userId": me.ID,
 				"limit":  api.LibraryFetchLimit,
 				"offset": offset,
@@ -141,8 +133,8 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		return err
 	}
 
-	// Group journals by date -> book_id -> { pages, cumulative, total, title }.
-	daily := map[string]map[int]map[string]any{}
+	// Group journals by date -> book_id -> entry.
+	daily := map[string]map[int]*dailyEntry{}
 	for _, j := range journals {
 		var meta struct {
 			ProgressPages    *int `json:"progress_pages"`
@@ -177,22 +169,18 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		}
 		totalPages := info.Book.Pages
 		if daily[dt] == nil {
-			daily[dt] = map[int]map[string]any{}
+			daily[dt] = map[int]*dailyEntry{}
 		}
 		entry, ok := daily[dt][bid]
 		if !ok {
-			entry = map[string]any{
-				"pages":     0,
-				"cumulative": 0,
-				"title":     title,
-			}
+			entry = &dailyEntry{Title: title}
 			if totalPages > 0 {
-				entry["total_pages"] = totalPages
+				entry.TotalPages = &totalPages
 			}
+			daily[dt][bid] = entry
 		}
-		entry["pages"] = entry["pages"].(int) + pages
-		entry["cumulative"] = current
-		daily[dt][bid] = entry
+		entry.Pages += pages
+		entry.Cumulative = current
 	}
 
 	today := time.Now().UTC().Truncate(24 * time.Hour)
@@ -209,43 +197,23 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 			dates = append(dates, d)
 		}
 	}
-	for i := 1; i < len(dates); i++ {
-		for j := i; j > 0 && dates[j-1] > dates[j]; j-- {
-			dates[j-1], dates[j] = dates[j], dates[j-1]
-		}
-	}
+	slices.Sort(dates)
 
 	jsonResult := []dailyResult{}
 	for _, d := range dates {
 		books := daily[d]
 		dayTotal := 0
+		var sorted []*dailyEntry
+		for _, e := range books {
+			sorted = append(sorted, e)
+			dayTotal += e.Pages
+		}
+		slices.SortFunc(sorted, func(a, b *dailyEntry) int {
+			return b.Pages - a.Pages
+		})
 		var entries []dailyEntry
-		// Sort books by pages desc.
-		type kv struct {
-			bid int
-			e   map[string]any
-		}
-		var sorted []kv
-		for bid, e := range books {
-			sorted = append(sorted, kv{bid, e})
-			dayTotal += e["pages"].(int)
-		}
-		for i := 1; i < len(sorted); i++ {
-			for j := i; j > 0 && sorted[j-1].e["pages"].(int) < sorted[j].e["pages"].(int); j-- {
-				sorted[j-1], sorted[j] = sorted[j], sorted[j-1]
-			}
-		}
-		for _, k := range sorted {
-			e := k.e
-			ent := dailyEntry{
-				Title:      e["title"].(string),
-				Pages:      e["pages"].(int),
-				Cumulative: e["cumulative"].(int),
-			}
-			if tp, ok := e["total_pages"].(int); ok {
-				ent.TotalPages = &tp
-			}
-			entries = append(entries, ent)
+		for _, e := range sorted {
+			entries = append(entries, *e)
 		}
 		jsonResult = append(jsonResult, dailyResult{
 			Date: d, TotalPages: dayTotal, Books: entries,
@@ -308,7 +276,7 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 			fmt.Fprintf(out, "  %s %s%s  %3dp  %s\n",
 				styles.Apply(styles.Dim, tree),
 				displayTitle,
-				styles.Apply(styles.Dim, repeatDot(dots)),
+				styles.Apply(styles.Dim, strings.Repeat(".", dots)),
 				b.Pages,
 				styles.Apply(styles.Dim, fmt.Sprintf("(cumulative %d%s)", cumul, totalStr)),
 			)
@@ -328,12 +296,4 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	)
 	fmt.Fprintln(out)
 	return nil
-}
-
-func repeatDot(n int) string {
-	out := make([]byte, n)
-	for i := range out {
-		out[i] = '.'
-	}
-	return string(out)
 }

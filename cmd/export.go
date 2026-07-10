@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"time"
 
@@ -74,17 +75,7 @@ func runExport(cmd *cobra.Command, _ []string) error {
 			var resp struct {
 				UserBooks []bookRow `json:"user_books"`
 			}
-			if gerr := c.GQL(ctx, `
-query ($userId: Int!, $limit: Int!, $offset: Int!) {
-  user_books(
-    where: { user_id: { _eq: $userId } }
-    limit: $limit
-    offset: $offset
-  ) {
-    book { id title }
-  }
-}
-`, map[string]any{
+			if gerr := c.GQL(ctx, api.QueryBookTitles, map[string]any{
 				"userId": me.ID,
 				"limit":  api.LibraryFetchLimit,
 				"offset": offset,
@@ -210,7 +201,11 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	out := cmd.OutOrStdout()
 	fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf("Wrote %d events to %s", len(events), styles.Apply(styles.Bold, output))))
 	fmt.Fprintf(out, "\n%s\n", styles.Apply(styles.Bold, "Pages read per day:"))
-	dates := sortedStringKeys(daily)
+	dates := make([]string, 0, len(daily))
+	for k := range daily {
+		dates = append(dates, k)
+	}
+	slices.Sort(dates)
 	for _, dt := range dates {
 		books := daily[dt]
 		total := 0
@@ -222,7 +217,11 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 			styles.Apply(styles.Bold, dt),
 			styles.Apply(styles.Green, fmt.Sprintf("%d pages", total)),
 		)
-		bookNames := sortedStringKeys(books)
+		bookNames := make([]string, 0, len(books))
+		for k := range books {
+			bookNames = append(bookNames, k)
+		}
+		slices.Sort(bookNames)
 		for _, b := range bookNames {
 			fmt.Fprintf(out, "    %s %s: %dp\n",
 				styles.Apply(styles.Dim, "├─"),
@@ -231,19 +230,4 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		}
 	}
 	return nil
-}
-
-// sortedStringKeys returns the keys of m sorted lexicographically.
-// Used for both the outer date->book map and the inner book->pages map.
-func sortedStringKeys[V any](m map[string]V) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	for i := 1; i < len(out); i++ {
-		for j := i; j > 0 && out[j-1] > out[j]; j-- {
-			out[j-1], out[j] = out[j], out[j-1]
-		}
-	}
-	return out
 }

@@ -242,6 +242,34 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 }
 `
 
+// QueryBookTitles fetches id and title for every user book, paginated.
+// Used by export to build the book_id -> title mapping.
+const QueryBookTitles = `
+query ($userId: Int!, $limit: Int!, $offset: Int!) {
+  user_books(
+    where: { user_id: { _eq: $userId } }
+    limit: $limit
+    offset: $offset
+  ) {
+    book { id title }
+  }
+}
+`
+
+// QueryBookTitlesAndPages fetches id, title, and pages for every user
+// book, paginated. Used by daily to build book metadata.
+const QueryBookTitlesAndPages = `
+query ($userId: Int!, $limit: Int!, $offset: Int!) {
+  user_books(
+    where: { user_id: { _eq: $userId } }
+    limit: $limit
+    offset: $offset
+  ) {
+    book { id title pages }
+  }
+}
+`
+
 // QueryActiveRead fetches the active user_book_read for a user_book.
 const QueryActiveRead = `
 query ($userBookId: Int!) {

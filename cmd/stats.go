@@ -10,6 +10,7 @@ import (
 	"github.com/KIRKR101/hardcover-cli/internal/config"
 	"github.com/KIRKR101/hardcover-cli/internal/ui"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
 
@@ -108,15 +109,15 @@ func runStats(cmd *cobra.Command, _ []string) error {
 	type stat struct {
 		label string
 		value string
-		style string
+		style *lipgloss.Style
 	}
 	stats := []stat{
-		{"Total books", fmt.Sprintf("%d", totalCount), ""},
-		{"Read", fmt.Sprintf("%d", readCount), "BGreen"},
-		{"Currently reading", fmt.Sprintf("%d", readingCount), "BYellow"},
-		{"Want to read", fmt.Sprintf("%d", wantCount), "Cyan"},
-		{"DNF (Did Not Finish)", fmt.Sprintf("%d", dnfCount), "Red"},
-		{"Total pages read", fmt.Sprintf("%d", totalPages), "Bold"},
+		{"Total books", fmt.Sprintf("%d", totalCount), nil},
+		{"Read", fmt.Sprintf("%d", readCount), &styles.BGreen},
+		{"Currently reading", fmt.Sprintf("%d", readingCount), &styles.BYellow},
+		{"Want to read", fmt.Sprintf("%d", wantCount), &styles.Cyan},
+		{"DNF (Did Not Finish)", fmt.Sprintf("%d", dnfCount), &styles.Red},
+		{"Total pages read", fmt.Sprintf("%d", totalPages), &styles.Bold},
 	}
 	for _, s := range stats {
 		dots := 38 - len(s.label) - len(s.value)
@@ -124,17 +125,8 @@ func runStats(cmd *cobra.Command, _ []string) error {
 			dots = 1
 		}
 		val := s.value
-		switch s.style {
-		case "BGreen":
-			val = styles.Apply(styles.BGreen, val)
-		case "BYellow":
-			val = styles.Apply(styles.BYellow, val)
-		case "Cyan":
-			val = styles.Apply(styles.Cyan, val)
-		case "Red":
-			val = styles.Apply(styles.Red, val)
-		case "Bold":
-			val = styles.Apply(styles.Bold, val)
+		if s.style != nil {
+			val = styles.Apply(*s.style, val)
 		}
 		fmt.Fprintf(out, "%s  %s %s%s %s\n",
 			styles.Apply(styles.Dim, "│"),
