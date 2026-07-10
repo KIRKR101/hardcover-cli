@@ -1,2 +1,15 @@
-__pycache__/
-*.egg-info/
+# Go build artefacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/hardcover
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
