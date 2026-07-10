@@ -7,13 +7,13 @@ import (
 	"slices"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/KIRKR101/hardcover-cli/internal/api"
 	"github.com/KIRKR101/hardcover-cli/internal/config"
 	"github.com/KIRKR101/hardcover-cli/internal/errs"
 	"github.com/KIRKR101/hardcover-cli/internal/ui"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +58,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -78,7 +78,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 	var bookResp struct {
 		UserBooks []bookRow `json:"user_books"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		offset := 0
 		for {
 			var resp struct {
@@ -108,7 +108,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 	}
 
 	var journals []api.ReadingJournal
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		offset := 0
 		for {
 			var resp struct {
@@ -265,10 +265,10 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 			// Truncate long titles so the dotted line stays consistent.
 			const maxTitle = 40
 			displayTitle := b.Title
-			if utf8.RuneCountInString(displayTitle) > maxTitle {
+			if runewidth.StringWidth(displayTitle) > maxTitle {
 				displayTitle = ui.Truncate(displayTitle, maxTitle)
 			}
-			titleLen := utf8.RuneCountInString(displayTitle)
+			titleLen := runewidth.StringWidth(displayTitle)
 			dots := 50 - titleLen
 			if dots < 2 {
 				dots = 2

@@ -36,7 +36,7 @@ func runStats(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -54,7 +54,7 @@ func runStats(cmd *cobra.Command, _ []string) error {
 		Rated   *aggregateCountAvg `json:"rated"`
 		Goals   []api.Goal         `json:"goals"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		return c.GQL(ctx, api.QueryStats, map[string]any{"userId": me.ID}, &statsResp)
 	})
 	if err != nil {
@@ -74,7 +74,7 @@ func runStats(cmd *cobra.Command, _ []string) error {
 	goals := statsResp.Goals
 
 	var totalPages int
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var perr error
 		totalPages, perr = fetchReadTotalPages(ctx, c, me.ID)
 		return perr

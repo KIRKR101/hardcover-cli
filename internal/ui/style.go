@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-runewidth"
 )
 
 // ColorOn returns lipgloss with colors if hasColor is true, plain otherwise.
@@ -11,17 +12,18 @@ import (
 type Styles struct {
 	Color bool
 
-	Title   lipgloss.Style
-	Bold    lipgloss.Style
-	Dim     lipgloss.Style
-	Green   lipgloss.Style
-	Red     lipgloss.Style
-	Yellow  lipgloss.Style
-	Cyan    lipgloss.Style
-	Magenta lipgloss.Style
-	BGreen  lipgloss.Style
-	BYellow lipgloss.Style
-	BCyan   lipgloss.Style
+	Title       lipgloss.Style
+	Bold        lipgloss.Style
+	Dim         lipgloss.Style
+	Green       lipgloss.Style
+	Red         lipgloss.Style
+	Yellow      lipgloss.Style
+	Cyan        lipgloss.Style
+	Magenta     lipgloss.Style
+	BGreen      lipgloss.Style
+	BYellow     lipgloss.Style
+	BCyan       lipgloss.Style
+	SuccessBold lipgloss.Style
 }
 
 // NewStyles returns styles with colors enabled/disabled.
@@ -41,6 +43,7 @@ func NewStyles(color bool) *Styles {
 	s.BGreen = lipgloss.NewStyle().Foreground(lipgloss.Color("150"))
 	s.BYellow = lipgloss.NewStyle().Foreground(lipgloss.Color("228"))
 	s.BCyan = lipgloss.NewStyle().Foreground(lipgloss.Color("239"))
+	s.SuccessBold = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("150"))
 	return s
 }
 
@@ -177,19 +180,20 @@ func clamp(v, lo, hi float64) float64 {
 	return v
 }
 
-// Truncate returns s truncated to n runes, with an ellipsis if truncated.
+// Truncate returns s truncated to n columns, with an ellipsis if truncated.
 func Truncate(s string, n int) string {
 	if n <= 0 {
 		return ""
 	}
-	runes := []rune(s)
-	if len(runes) <= n {
+	width := runewidth.StringWidth(s)
+	if width <= n {
 		return s
 	}
-	if n <= 1 {
-		return string(runes[:n])
+	ellipsisWidth := runewidth.StringWidth("…")
+	if n <= ellipsisWidth {
+		return runewidth.Truncate(s, n, "")
 	}
-	return string(runes[:n-1]) + "…"
+	return runewidth.Truncate(s, n, "…")
 }
 
 // Success returns a green-styled message with no prefix glyph.

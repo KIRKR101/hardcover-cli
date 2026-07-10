@@ -37,7 +37,7 @@ func runGoals(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -53,7 +53,7 @@ func runGoals(cmd *cobra.Command, _ []string) error {
 	var resp struct {
 		Goals []api.Goal `json:"goals"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		return c.GQL(ctx, query, map[string]any{"userId": me.ID}, &resp)
 	})
 	if err != nil {

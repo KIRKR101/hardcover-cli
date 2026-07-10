@@ -47,7 +47,7 @@ func runLibrary(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -79,7 +79,7 @@ func runLibrary(cmd *cobra.Command, _ []string) error {
 	var resp struct {
 		UserBooks []api.UserBook `json:"user_books"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		return c.GQL(ctx, query, vars, &resp)
 	})
 	if err != nil {

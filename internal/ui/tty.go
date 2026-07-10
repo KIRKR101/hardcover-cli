@@ -31,10 +31,11 @@ func HasColor(disableColor bool) bool {
 }
 
 // ShouldSpinner reports whether a yacspin spinner should be shown.
-// True when stdout is a terminal and --json was not passed.
+// True when stderr is a terminal and --json was not passed.
 func ShouldSpinner(jsonMode bool) bool {
 	if jsonMode {
 		return false
 	}
-	return isatty(os.Stdout)
+	return isatty(os.Stderr)
 }
+

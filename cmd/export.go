@@ -8,6 +8,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KIRKR101/hardcover-cli/internal/api"
@@ -50,7 +51,7 @@ func runExport(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -69,7 +70,7 @@ func runExport(cmd *cobra.Command, _ []string) error {
 	var bookResp struct {
 		UserBooks []bookRow `json:"user_books"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		offset := 0
 		for {
 			var resp struct {
@@ -100,7 +101,7 @@ func runExport(cmd *cobra.Command, _ []string) error {
 
 	// All journals.
 	var journals []api.ReadingJournal
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		offset := 0
 		for {
 			var resp struct {
@@ -199,7 +200,11 @@ func runExport(cmd *cobra.Command, _ []string) error {
 	}
 
 	out := cmd.OutOrStdout()
-	fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf("Wrote %d events to %s", len(events), styles.Apply(styles.Bold, output))))
+	parts := []string{
+		styles.Apply(styles.Green, fmt.Sprintf("Wrote %d events to ", len(events))),
+		styles.Apply(styles.SuccessBold, output),
+	}
+	fmt.Fprintln(out, strings.Join(parts, ""))
 	fmt.Fprintf(out, "\n%s\n", styles.Apply(styles.Bold, "Pages read per day:"))
 	dates := make([]string, 0, len(daily))
 	for k := range daily {

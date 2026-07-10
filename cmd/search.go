@@ -45,7 +45,7 @@ func runSearch(cmd *cobra.Command, args []string) error {
 			} `json:"results"`
 		} `json:"search"`
 	}
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		return c.GQL(ctx, api.QuerySearch, map[string]any{
 			"query":   query,
 			"perPage": limit,

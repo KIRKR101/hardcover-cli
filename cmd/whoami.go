@@ -33,7 +33,7 @@ func runWhoami(cmd *cobra.Command, _ []string) error {
 	c := api.New(token)
 
 	var user api.User
-	err = ui.WithSpinner(cmd.Context(), func(ctx context.Context) error {
+	err = ui.WithSpinner(cmd.Context(), jsonMode, func(ctx context.Context) error {
 		var resp struct {
 			Me []api.User `json:"me"`
 		}

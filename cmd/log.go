@@ -88,7 +88,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 	c := api.New(token)
 
 	var me api.User
-	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+	err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 		var gerr error
 		me, gerr = getMe(ctx, c)
 		return gerr
@@ -118,7 +118,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 					Book      *api.Book     `json:"book"`
 				} `json:"user_books_by_pk"`
 			}
-			err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+			err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 				return c.GQL(ctx, api.QueryUserBookByID, map[string]any{"id": idFlag}, &resp)
 			})
 			if err != nil {
@@ -137,7 +137,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 	} else {
 		queryStr := strings.ToLower(args[0])
 		var allBooks []api.UserBook
-		err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+		err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 			offset := 0
 			for {
 				var resp struct {
@@ -229,7 +229,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 				ID int `json:"id"`
 			} `json:"user_book_reads"`
 		}
-		err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+		err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 			return c.GQL(ctx, api.QueryActiveRead, map[string]any{
 				"userBookId": userBookID,
 			}, &readResp)
@@ -244,14 +244,14 @@ func runLog(cmd *cobra.Command, args []string) error {
 
 		if len(readResp.UserBookReads) > 0 {
 			readID := readResp.UserBookReads[0].ID
-			err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+			err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 				return c.GQL(ctx, api.MutationUpdateUserBookRead, map[string]any{
 					"id":     readID,
 					"object": readInput,
 				}, nil)
 			})
 		} else {
-			err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+			err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 				return c.GQL(ctx, api.MutationInsertUserBookRead, map[string]any{
 					"userBookId":   userBookID,
 					"userBookRead": readInput,
@@ -269,7 +269,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 		if !ok {
 			return fmt.Errorf("unknown status %q: %w", statusArg, errs.ErrInvalid)
 		}
-		err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+		err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 			return c.GQL(ctx, api.MutationUpdateUserBook, map[string]any{
 				"id":     userBookID,
 				"object": map[string]any{"status_id": statusID},
@@ -283,7 +283,7 @@ func runLog(cmd *cobra.Command, args []string) error {
 	}
 
 	if hasRating {
-		err = ui.WithSpinner(ctx, func(ctx context.Context) error {
+		err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
 			return c.GQL(ctx, api.MutationUpdateUserBook, map[string]any{
 				"id":     userBookID,
 				"object": map[string]any{"rating": rating},
@@ -304,25 +304,34 @@ func runLog(cmd *cobra.Command, args []string) error {
 
 	out := cmd.OutOrStdout()
 	if result.PagesLogged != nil {
-		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
-			"Logged %s pages for '%s'",
-			styles.Apply(styles.Bold, fmt.Sprintf("%d", *result.PagesLogged)),
-			styles.Apply(styles.Bold, bookTitle),
-		)))
+		parts := []string{
+			styles.Apply(styles.Green, "Logged "),
+			styles.Apply(styles.SuccessBold, fmt.Sprintf("%d", *result.PagesLogged)),
+			styles.Apply(styles.Green, " pages for '"),
+			styles.Apply(styles.SuccessBold, bookTitle),
+			styles.Apply(styles.Green, "'"),
+		}
+		fmt.Fprintln(out, strings.Join(parts, ""))
 	}
 	if result.Status != nil {
-		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
-			"Updated '%s' status to '%s'",
-			styles.Apply(styles.Bold, bookTitle),
+		parts := []string{
+			styles.Apply(styles.Green, "Updated '"),
+			styles.Apply(styles.SuccessBold, bookTitle),
+			styles.Apply(styles.Green, "' status to '"),
 			styles.Apply(styles.Cyan, *result.Status),
-		)))
+			styles.Apply(styles.Green, "'"),
+		}
+		fmt.Fprintln(out, strings.Join(parts, ""))
 	}
 	if result.Rating != nil {
-		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
-			"Rated '%s' %s/5",
-			styles.Apply(styles.Bold, bookTitle),
+		parts := []string{
+			styles.Apply(styles.Green, "Rated '"),
+			styles.Apply(styles.SuccessBold, bookTitle),
+			styles.Apply(styles.Green, "' "),
 			styles.Apply(styles.BYellow, fmt.Sprintf("★ %.1f", *result.Rating)),
-		)))
+			styles.Apply(styles.Green, "/5"),
+		}
+		fmt.Fprintln(out, strings.Join(parts, ""))
 	}
 	return nil
 }

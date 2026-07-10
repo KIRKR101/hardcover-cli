@@ -9,9 +9,9 @@ import (
 )
 
 // WithSpinner displays a terminal spinner while fn runs. The spinner is
-// suppressed when stdout is not a TTY or when --json is set.
-func WithSpinner(ctx context.Context, fn func(context.Context) error) error {
-	if !IsInteractive() {
+// suppressed when stdout is not a TTY or when jsonMode is true.
+func WithSpinner(ctx context.Context, jsonMode bool, fn func(context.Context) error) error {
+	if !ShouldSpinner(jsonMode) {
 		return fn(ctx)
 	}
 	s := spinner.New(spinner.CharSets[26], 80*time.Millisecond,
