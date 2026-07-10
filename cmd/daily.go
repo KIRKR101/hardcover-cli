@@ -198,7 +198,6 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	cutoff := today.AddDate(0, 0, -(days - 1))
 
 	// Build ordered results.
-	type dayKey string
 	var dates []string
 	for d := range daily {
 		t, err := time.Parse("2006-01-02", d)
@@ -216,7 +215,6 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	}
 
 	jsonResult := []dailyResult{}
-	flat := map[string]map[int]map[string]any{}
 	for _, d := range dates {
 		books := daily[d]
 		dayTotal := 0
@@ -251,7 +249,6 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		jsonResult = append(jsonResult, dailyResult{
 			Date: d, TotalPages: dayTotal, Books: entries,
 		})
-		flat[d] = books
 	}
 
 	if jsonMode {

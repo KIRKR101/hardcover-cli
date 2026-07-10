@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -213,9 +212,4 @@ func (s *Styles) Bullet() string {
 // Dot returns a dim middle dot, used as a separator.
 func (s *Styles) Dot() string {
 	return s.Apply(s.Dim, "│")
-}
-
-// Fmt is a small helper for formatted messages.
-func (s *Styles) Fmt(format string, a ...any) string {
-	return fmt.Sprintf(format, a...)
 }

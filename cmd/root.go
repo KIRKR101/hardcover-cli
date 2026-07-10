@@ -3,8 +3,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/KIRKR101/hardcover-cli/internal/ui"
 
@@ -15,19 +13,14 @@ import (
 var Version = "0.1.0"
 
 // Global flags shared across subcommands.
-type globalFlags struct {
+var gf struct {
 	noColor bool
-	jsonOut bool
 }
-
-var gf = &globalFlags{}
 
 // ctxKey is unexported so other packages can't collide.
 type ctxKey string
 
 const (
-	ctxKeyClient ctxKey = "client"
-	ctxKeyFlags  ctxKey = "flags"
 	ctxKeyStyles ctxKey = "styles"
 )
 
@@ -81,22 +74,8 @@ func stylesFromCmd(cmd *cobra.Command) *ui.Styles {
 	return s
 }
 
-// flagsFromCmd returns the per-invocation flags.
-func flagsFromCmd(cmd *cobra.Command) *globalFlags {
-	return gf
-}
-
 // jsonFromCmd reads --json from any subcommand.
 func jsonFromCmd(cmd *cobra.Command) bool {
 	v, _ := cmd.Flags().GetBool("json")
 	return v
-}
-
-// exitError prints err to stderr and exits with the right code.
-func exitError(err error) {
-	if err == nil {
-		return
-	}
-	fmt.Fprintln(os.Stderr, "error: "+err.Error())
-	os.Exit(ui.ExitCodeFor(err))
 }

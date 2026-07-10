@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/KIRKR101/hardcover-cli/internal/config"
@@ -60,5 +61,5 @@ func configPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return home + "/" + config.FileName, nil
+	return filepath.Join(home, config.FileName), nil
 }

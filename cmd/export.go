@@ -69,7 +69,12 @@ func runExport(cmd *cobra.Command, _ []string) error {
 		UserBooks []bookRow `json:"user_books"`
 	}
 	err = ui.WithSpinner(ctx, func(ctx context.Context) error {
-		return c.GQL(ctx, `
+		offset := 0
+		for {
+			var resp struct {
+				UserBooks []bookRow `json:"user_books"`
+			}
+			if gerr := c.GQL(ctx, `
 query ($userId: Int!, $limit: Int!, $offset: Int!) {
   user_books(
     where: { user_id: { _eq: $userId } }
@@ -80,10 +85,19 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
   }
 }
 `, map[string]any{
-			"userId": me.ID,
-			"limit":  api.LibraryFetchLimit,
-			"offset": 0,
-		}, &bookResp)
+				"userId": me.ID,
+				"limit":  api.LibraryFetchLimit,
+				"offset": offset,
+			}, &resp); gerr != nil {
+				return gerr
+			}
+			bookResp.UserBooks = append(bookResp.UserBooks, resp.UserBooks...)
+			if len(resp.UserBooks) < api.LibraryFetchLimit {
+				break
+			}
+			offset += api.LibraryFetchLimit
+		}
+		return nil
 	})
 	if err != nil {
 		return err

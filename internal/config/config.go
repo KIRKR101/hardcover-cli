@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/term"
 
@@ -118,5 +119,5 @@ func PromptToken() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("read token: %w", err)
 	}
-	return string(buf[:n]), nil
+	return strings.TrimSpace(string(buf[:n])), nil
 }
