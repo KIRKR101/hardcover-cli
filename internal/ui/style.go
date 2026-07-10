@@ -11,21 +11,17 @@ import (
 type Styles struct {
 	Color bool
 
-	Title    lipgloss.Style
-	Bold     lipgloss.Style
-	Dim      lipgloss.Style
-	Green    lipgloss.Style
-	Red      lipgloss.Style
-	Yellow   lipgloss.Style
-	Cyan     lipgloss.Style
-	Magenta  lipgloss.Style
-	BGreen   lipgloss.Style
-	BYellow  lipgloss.Style
-	BCyan    lipgloss.Style
-	BoldPure lipgloss.Style
-
-	Box      lipgloss.Style
-	TableDim lipgloss.Style
+	Title   lipgloss.Style
+	Bold    lipgloss.Style
+	Dim     lipgloss.Style
+	Green   lipgloss.Style
+	Red     lipgloss.Style
+	Yellow  lipgloss.Style
+	Cyan    lipgloss.Style
+	Magenta lipgloss.Style
+	BGreen  lipgloss.Style
+	BYellow lipgloss.Style
+	BCyan   lipgloss.Style
 }
 
 // NewStyles returns styles with colors enabled/disabled.
@@ -34,20 +30,17 @@ func NewStyles(color bool) *Styles {
 	if !color {
 		return s
 	}
-	s.Title = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
+	s.Title = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("150"))
 	s.Bold = lipgloss.NewStyle().Bold(true)
-	s.Dim = lipgloss.NewStyle().Faint(true)
-	s.Green = lipgloss.NewStyle().Foreground(lipgloss.Color("34"))
-	s.Red = lipgloss.NewStyle().Foreground(lipgloss.Color("31"))
-	s.Yellow = lipgloss.NewStyle().Foreground(lipgloss.Color("33"))
-	s.Cyan = lipgloss.NewStyle().Foreground(lipgloss.Color("36"))
-	s.Magenta = lipgloss.NewStyle().Foreground(lipgloss.Color("35"))
-	s.BGreen = lipgloss.NewStyle().Foreground(lipgloss.Color("82"))
-	s.BYellow = lipgloss.NewStyle().Foreground(lipgloss.Color("93"))
-	s.BCyan = lipgloss.NewStyle().Foreground(lipgloss.Color("96"))
-	s.BoldPure = lipgloss.NewStyle().Bold(true)
-	s.Box = lipgloss.NewStyle().Faint(true)
-	s.TableDim = lipgloss.NewStyle().Faint(true)
+	s.Dim = lipgloss.NewStyle().Foreground(lipgloss.Color("253"))
+	s.Green = lipgloss.NewStyle().Foreground(lipgloss.Color("150"))
+	s.Red = lipgloss.NewStyle().Foreground(lipgloss.Color("167"))
+	s.Yellow = lipgloss.NewStyle().Foreground(lipgloss.Color("222"))
+	s.Cyan = lipgloss.NewStyle().Foreground(lipgloss.Color("110"))
+	s.Magenta = lipgloss.NewStyle().Foreground(lipgloss.Color("170"))
+	s.BGreen = lipgloss.NewStyle().Foreground(lipgloss.Color("150"))
+	s.BYellow = lipgloss.NewStyle().Foreground(lipgloss.Color("228"))
+	s.BCyan = lipgloss.NewStyle().Foreground(lipgloss.Color("239"))
 	return s
 }
 
@@ -207,9 +200,4 @@ func (s *Styles) Success(msg string) string {
 // Bullet returns a cyan bullet point.
 func (s *Styles) Bullet() string {
 	return s.Apply(s.BCyan, "●")
-}
-
-// Dot returns a dim middle dot, used as a separator.
-func (s *Styles) Dot() string {
-	return s.Apply(s.Dim, "│")
 }

@@ -68,14 +68,14 @@ func runGoals(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(goals) == 0 {
-		fmt.Fprintln(cmd.OutOrStdout(), "  "+styles.Apply(styles.Yellow, "No reading goals found."))
+		fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Yellow, "No reading goals found."))
 		return nil
 	}
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, "Reading Goals"))
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, "Reading Goals"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
 
 	for _, g := range goals {
 		pct := 0.0
@@ -96,17 +96,17 @@ func runGoals(cmd *cobra.Command, _ []string) error {
 		stateTag := styles.Apply(stateColor, fmt.Sprintf("[%s]", strings.ToUpper(g.State)))
 
 		metricDisplay := titleCase(strings.ReplaceAll(g.Metric, "_", " "))
-		fmt.Fprintf(out, "\n  %s  %s\n", stateTag, styles.Apply(styles.Bold, metricDisplay+" Goal"))
-		fmt.Fprintf(out, "     %s  %s  %s\n",
+		fmt.Fprintf(out, "\n%s  %s\n", stateTag, styles.Apply(styles.Bold, metricDisplay+" Goal"))
+		fmt.Fprintf(out, "   %s  %s  %s\n",
 			bar,
 			styles.Apply(styles.Bold, fmt.Sprintf("%.0f%%", pct)),
 			styles.Apply(styles.Dim, fmt.Sprintf("(%.0f/%.0f)", g.Progress, g.Goal)),
 		)
-		fmt.Fprintf(out, "     %s\n",
+		fmt.Fprintf(out, "   %s\n",
 			styles.Apply(styles.Dim, fmt.Sprintf("Period: %s ➔ %s", g.StartDate, g.EndDate)),
 		)
 		if g.Description != nil && *g.Description != "" {
-			fmt.Fprintf(out, "     %s\n",
+			fmt.Fprintf(out, "   %s\n",
 				styles.Apply(styles.Dim, "Note: "+*g.Description),
 			)
 		}

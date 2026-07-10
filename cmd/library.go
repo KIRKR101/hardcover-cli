@@ -95,18 +95,18 @@ func runLibrary(cmd *cobra.Command, _ []string) error {
 
 	if len(books) == 0 {
 		if status == "" {
-			fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Yellow, "  No books found."))
+			fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Yellow, "No books found."))
 		} else {
-			fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", styles.Apply(styles.Yellow, fmt.Sprintf("No books with status '%s'.", status)))
+			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", styles.Apply(styles.Yellow, fmt.Sprintf("No books with status '%s'.", status)))
 		}
 		return nil
 	}
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintln(out, "  "+styles.Apply(styles.Title, "Your Library"))
+	fmt.Fprintln(out, styles.Apply(styles.Title, "Your Library"))
 	renderLibraryTable(out, styles, books)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, fmt.Sprintf("Showing %d books (offset=%d)", len(books), offset)))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, fmt.Sprintf("Showing %d books (offset=%d)", len(books), offset)))
 	fmt.Fprintln(out)
 	return nil
 }
@@ -128,11 +128,11 @@ func renderLibraryTable(out io.Writer, styles *ui.Styles, books []api.UserBook) 
 	bold := func(s string) string { return styles.Apply(styles.Bold, s) }
 	sep := dim + " │ "
 	total := colIdx + colStatus + colRating + titleW + colAuth + (3 * 4) // 4 separators
-	top := "  " + dim + "┌" + strings.Repeat("─", total) + "┐"
-	mid := "  " + dim + "├" + strings.Repeat("─", total) + "┤"
-	bot := "  " + dim + "└" + strings.Repeat("─", total) + "┘"
+	top := dim + "┌" + strings.Repeat("─", total) + "┐"
+	mid := dim + "├" + strings.Repeat("─", total) + "┤"
+	bot := dim + "└" + strings.Repeat("─", total) + "┘"
 
-	header := "  " + sep +
+	header := sep +
 		ui.PadRight(bold("#"), colIdx) + sep +
 		ui.PadRight(bold("Status"), colStatus) + sep +
 		ui.PadRight(bold("Rating"), colRating) + sep +
@@ -178,7 +178,7 @@ func renderLibraryTable(out io.Writer, styles *ui.Styles, books []api.UserBook) 
 
 		idx := ui.PadRight(fmt.Sprintf("%d", i+1), colIdx)
 
-		row := "  " + sep +
+		row := sep +
 			idx + sep +
 			statusCell + sep +
 			ratingCell + sep +

@@ -304,21 +304,21 @@ func runLog(cmd *cobra.Command, args []string) error {
 
 	out := cmd.OutOrStdout()
 	if result.PagesLogged != nil {
-		fmt.Fprintf(out, "  %s\n", styles.Success(fmt.Sprintf(
+		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
 			"Logged %s pages for '%s'",
 			styles.Apply(styles.Bold, fmt.Sprintf("%d", *result.PagesLogged)),
 			styles.Apply(styles.Bold, bookTitle),
 		)))
 	}
 	if result.Status != nil {
-		fmt.Fprintf(out, "  %s\n", styles.Success(fmt.Sprintf(
+		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
 			"Updated '%s' status to '%s'",
 			styles.Apply(styles.Bold, bookTitle),
 			styles.Apply(styles.Cyan, *result.Status),
 		)))
 	}
 	if result.Rating != nil {
-		fmt.Fprintf(out, "  %s\n", styles.Success(fmt.Sprintf(
+		fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf(
 			"Rated '%s' %s/5",
 			styles.Apply(styles.Bold, bookTitle),
 			styles.Apply(styles.BYellow, fmt.Sprintf("★ %.1f", *result.Rating)),

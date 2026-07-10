@@ -63,14 +63,14 @@ func runSearch(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(hits) == 0 {
-		fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", styles.Apply(styles.Yellow, fmt.Sprintf("No results for %q.", query)))
+		fmt.Fprintf(cmd.OutOrStdout(), "%s\n", styles.Apply(styles.Yellow, fmt.Sprintf("No results for %q.", query)))
 		return nil
 	}
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, fmt.Sprintf("Search Results for %q", query)))
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Search Results for %q", query)))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────"))
 
 	for i, hit := range hits {
 		r := decodeHit(hit)
@@ -108,9 +108,9 @@ func runSearch(cmd *cobra.Command, args []string) error {
 			meta = append(meta, styles.Apply(styles.BYellow, fmt.Sprintf("★ %.1f", rating)))
 		}
 
-		fmt.Fprintf(out, "  %s %s\n", styles.Apply(styles.BCyan, fmt.Sprintf("%2d.", i+1)), styles.Apply(styles.Bold, title))
+		fmt.Fprintf(out, "%s %s\n", styles.Apply(styles.BCyan, fmt.Sprintf("%2d.", i+1)), styles.Apply(styles.Bold, title))
 		if len(meta) > 0 {
-			fmt.Fprintf(out, "     %s %s\n", styles.Apply(styles.Dim, "│"), ui.JoinStrings(meta, "  •  "))
+			fmt.Fprintf(out, "   %s %s\n", styles.Apply(styles.Dim, "│"), ui.JoinStrings(meta, "  •  "))
 		}
 	}
 	fmt.Fprintln(out)

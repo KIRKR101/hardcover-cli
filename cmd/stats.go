@@ -102,8 +102,8 @@ func runStats(cmd *cobra.Command, _ []string) error {
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, fmt.Sprintf("Library Statistics: %s", me.Username)))
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "┌────────────────────────────────────────┐"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Library Statistics: %s", me.Username)))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "┌────────────────────────────────────────┐"))
 
 	type stat struct {
 		label string
@@ -136,7 +136,7 @@ func runStats(cmd *cobra.Command, _ []string) error {
 		case "Bold":
 			val = styles.Apply(styles.Bold, val)
 		}
-		fmt.Fprintf(out, "  %s  %s %s%s %s\n",
+		fmt.Fprintf(out, "%s  %s %s%s %s\n",
 			styles.Apply(styles.Dim, "│"),
 			s.label,
 			styles.Apply(styles.Dim, strings.Repeat(".", dots)),
@@ -150,7 +150,7 @@ func runStats(cmd *cobra.Command, _ []string) error {
 		if dots < 1 {
 			dots = 1
 		}
-		fmt.Fprintf(out, "  %s  %s %s%s %s\n",
+		fmt.Fprintf(out, "%s  %s %s%s %s\n",
 			styles.Apply(styles.Dim, "│"),
 			"Avg rating",
 			styles.Apply(styles.Dim, strings.Repeat(".", dots)),
@@ -159,12 +159,12 @@ func runStats(cmd *cobra.Command, _ []string) error {
 			styles.Apply(styles.Dim, "│"),
 		)
 	}
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "└────────────────────────────────────────┘"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "└────────────────────────────────────────┘"))
 	fmt.Fprintln(out)
 
 	if len(goals) > 0 {
-		fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, "Active Goals"))
-		fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "──────────────────────────────────────────"))
+		fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, "Active Goals"))
+		fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "──────────────────────────────────────────"))
 		for _, g := range goals {
 			pct := 0.0
 			if g.Goal > 0 {
@@ -172,13 +172,13 @@ func runStats(cmd *cobra.Command, _ []string) error {
 			}
 			metricName := titleCase(strings.ReplaceAll(g.Metric, "_", " "))
 			bar := styles.ProgressBar(pct, 24)
-			fmt.Fprintf(out, "    %s\n", styles.Apply(styles.Bold, metricName))
-			fmt.Fprintf(out, "    %s  %s  %s\n",
+			fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Bold, metricName))
+			fmt.Fprintf(out, "  %s  %s  %s\n",
 				bar,
 				styles.Apply(styles.Bold, fmt.Sprintf("%.0f%%", pct)),
 				styles.Apply(styles.Dim, fmt.Sprintf("(%.0f/%.0f)", g.Progress, g.Goal)),
 			)
-			fmt.Fprintf(out, "    %s\n\n",
+			fmt.Fprintf(out, "  %s\n\n",
 				styles.Apply(styles.Dim, fmt.Sprintf("Timeframe: %s to %s", g.StartDate, g.EndDate)),
 			)
 		}

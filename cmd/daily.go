@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"github.com/KIRKR101/hardcover-cli/internal/api"
 	"github.com/KIRKR101/hardcover-cli/internal/config"
@@ -258,7 +259,7 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	}
 
 	if len(jsonResult) == 0 {
-		fmt.Fprintf(cmd.OutOrStdout(), "  %s\n",
+		fmt.Fprintf(cmd.OutOrStdout(), "%s\n",
 			styles.Apply(styles.Yellow, fmt.Sprintf("No reading activity in the last %d days.", days)),
 		)
 		return nil
@@ -267,8 +268,8 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	weekdayNames := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, fmt.Sprintf("Reading Log (last %d days)", days)))
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Reading Log (last %d days)", days)))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
 
 	totalAll := 0
 	for _, entry := range jsonResult {
@@ -276,7 +277,7 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		totalAll += dayTotal
 		t, _ := time.Parse("2006-01-02", entry.Date)
 		wd := weekdayNames[int(t.Weekday())]
-		fmt.Fprintf(out, "\n  %s %s %s  %s\n",
+		fmt.Fprintf(out, "\n%s %s %s  %s\n",
 			styles.Bullet(),
 			styles.Apply(styles.Bold, fmt.Sprintf("%s %s", entry.Date, wd)),
 			"",
@@ -294,22 +295,22 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 				totalStr = fmt.Sprintf("/%d", *b.TotalPages)
 			}
 			// Truncate long titles so the dotted line stays consistent.
-			// 40 chars leaves room for at least 2 dots before the page count.
 			const maxTitle = 40
 			displayTitle := b.Title
-			if len(displayTitle) > maxTitle {
+			if utf8.RuneCountInString(displayTitle) > maxTitle {
 				displayTitle = ui.Truncate(displayTitle, maxTitle)
 			}
-			dots := 45 - len(displayTitle)
+			titleLen := utf8.RuneCountInString(displayTitle)
+			dots := 50 - titleLen
 			if dots < 2 {
 				dots = 2
 			}
-			fmt.Fprintf(out, "    %s %s %s  %s  %s\n",
+			fmt.Fprintf(out, "  %s %s%s  %3dp  %s\n",
 				styles.Apply(styles.Dim, tree),
-				fmt.Sprintf("%s %s", displayTitle, styles.Apply(styles.Dim, repeatDot(dots))),
-				styles.Apply(styles.Bold, fmt.Sprintf("%dp", b.Pages)),
+				displayTitle,
+				styles.Apply(styles.Dim, repeatDot(dots)),
+				b.Pages,
 				styles.Apply(styles.Dim, fmt.Sprintf("(cumulative %d%s)", cumul, totalStr)),
-				"",
 			)
 		}
 	}
@@ -317,8 +318,8 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	if len(jsonResult) > 0 {
 		avg = totalAll / len(jsonResult)
 	}
-	fmt.Fprintf(out, "\n  %s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
-	fmt.Fprintf(out, "  %s %s over %s %s %s\n",
+	fmt.Fprintf(out, "\n%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s %s over %s %s %s\n",
 		styles.Apply(styles.Bold, "Summary:"),
 		styles.Apply(styles.Green, fmt.Sprintf("%d pages", totalAll)),
 		styles.Apply(styles.Bold, fmt.Sprintf("%d", len(jsonResult))),

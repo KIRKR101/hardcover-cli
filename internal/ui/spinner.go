@@ -1,11 +1,24 @@
 package ui
 
-import "context"
+import (
+	"context"
+	"os"
+	"time"
 
-// WithSpinner is a thin pass-through. Originally wrapped yacspin for
-// visual feedback during API calls, but the ticks/animation were
-// dropped in favour of silent operation. The function signature is
-// kept so call sites remain stable.
+	"github.com/briandowns/spinner"
+)
+
+// WithSpinner displays a terminal spinner while fn runs. The spinner is
+// suppressed when stdout is not a TTY or when --json is set.
 func WithSpinner(ctx context.Context, fn func(context.Context) error) error {
+	if !IsInteractive() {
+		return fn(ctx)
+	}
+	s := spinner.New(spinner.CharSets[26], 80*time.Millisecond,
+		spinner.WithWriter(os.Stderr),
+		spinner.WithColor("cyan"),
+	)
+	s.Start()
+	defer s.Stop()
 	return fn(ctx)
 }

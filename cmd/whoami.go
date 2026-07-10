@@ -58,21 +58,21 @@ func runWhoami(cmd *cobra.Command, _ []string) error {
 
 	// Formatted output.
 	fmt.Fprintln(cmd.OutOrStdout())
-	fmt.Fprintln(cmd.OutOrStdout(), "  "+styles.Apply(styles.Title, "Hardcover Profile"))
-	fmt.Fprintln(cmd.OutOrStdout(), "  "+styles.Apply(styles.Dim, "┌──────────────────────────────────────┐"))
+	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Title, "Hardcover Profile"))
+	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Dim, "┌──────────────────────────────────────┐"))
 	fmt.Fprintf(cmd.OutOrStdout(),
-		"    %s : %s\n",
+		"  %s : %s\n",
 		styles.Apply(styles.Bold, "Username"),
 		user.Username)
 	fmt.Fprintf(cmd.OutOrStdout(),
-		"    %s       : %d\n",
+		"  %s       : %d\n",
 		styles.Apply(styles.Bold, "ID"),
 		user.ID)
 	fmt.Fprintf(cmd.OutOrStdout(),
-		"    %s    : %s\n",
+		"  %s    : %s\n",
 		styles.Apply(styles.Bold, "Books"),
 		styles.Apply(styles.BGreen, fmt.Sprintf("%d", user.BooksCount)))
-	fmt.Fprintln(cmd.OutOrStdout(), "  "+styles.Apply(styles.Dim, "└──────────────────────────────────────┘"))
+	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Dim, "└──────────────────────────────────────┘"))
 	fmt.Fprintln(cmd.OutOrStdout())
 	return nil
 }

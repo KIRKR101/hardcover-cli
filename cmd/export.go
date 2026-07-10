@@ -208,8 +208,8 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 	}
 
 	out := cmd.OutOrStdout()
-	fmt.Fprintf(out, "  %s\n", styles.Success(fmt.Sprintf("Wrote %d events to %s", len(events), styles.Apply(styles.Bold, output))))
-	fmt.Fprintf(out, "\n  %s\n", styles.Apply(styles.Bold, "Pages read per day:"))
+	fmt.Fprintf(out, "%s\n", styles.Success(fmt.Sprintf("Wrote %d events to %s", len(events), styles.Apply(styles.Bold, output))))
+	fmt.Fprintf(out, "\n%s\n", styles.Apply(styles.Bold, "Pages read per day:"))
 	dates := sortedStringKeys(daily)
 	for _, dt := range dates {
 		books := daily[dt]
@@ -217,14 +217,14 @@ query ($userId: Int!, $limit: Int!, $offset: Int!) {
 		for _, p := range books {
 			total += p
 		}
-		fmt.Fprintf(out, "    %s %s: %s\n",
+		fmt.Fprintf(out, "  %s %s: %s\n",
 			styles.Bullet(),
 			styles.Apply(styles.Bold, dt),
 			styles.Apply(styles.Green, fmt.Sprintf("%d pages", total)),
 		)
 		bookNames := sortedStringKeys(books)
 		for _, b := range bookNames {
-			fmt.Fprintf(out, "      %s %s: %dp\n",
+			fmt.Fprintf(out, "    %s %s: %dp\n",
 				styles.Apply(styles.Dim, "├─"),
 				b, books[b],
 			)

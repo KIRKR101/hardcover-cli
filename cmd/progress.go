@@ -61,14 +61,14 @@ func runProgress(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(books) == 0 {
-		fmt.Fprintln(cmd.OutOrStdout(), "  "+styles.Apply(styles.Yellow, "No books currently being read."))
+		fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Yellow, "No books currently being read."))
 		return nil
 	}
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Title, fmt.Sprintf("Currently Reading (%d)", len(books))))
-	fmt.Fprintf(out, "  %s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Currently Reading (%d)", len(books))))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
 
 	for _, ub := range books {
 		book := ub.Book
@@ -86,8 +86,8 @@ func runProgress(cmd *cobra.Command, _ []string) error {
 		if total <= 0 {
 			totalDisplay = "?"
 		}
-		fmt.Fprintf(out, "\n    %s\n", styles.Apply(styles.Bold, book.Title))
-		fmt.Fprintf(out, "    %s  %s  %s\n",
+		fmt.Fprintf(out, "\n  %s\n", styles.Apply(styles.Bold, book.Title))
+		fmt.Fprintf(out, "  %s  %s  %s\n",
 			bar,
 			styles.Apply(styles.Bold, fmt.Sprintf("%.0f%%", pct)),
 			styles.Apply(styles.Dim, fmt.Sprintf("(%d/%s pages)", current, totalDisplay)),
