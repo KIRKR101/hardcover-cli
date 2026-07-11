@@ -55,6 +55,7 @@ func NewRootCmd() *cobra.Command {
 	root.AddCommand(newStatsCmd())
 	root.AddCommand(newProgressCmd())
 	root.AddCommand(newSearchCmd())
+	root.AddCommand(newAddCmd())
 	root.AddCommand(newGoalsCmd())
 	root.AddCommand(newExportCmd())
 	root.AddCommand(newDailyCmd())

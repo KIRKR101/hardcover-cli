@@ -312,3 +312,40 @@ mutation ($id: Int!, $object: UserBookUpdateInput!) {
   }
 }
 `
+
+// MutationInsertUserBook adds a book to the user's library.
+const MutationInsertUserBook = `
+mutation ($object: UserBookCreateInput!) {
+  insert_user_book(object: $object) {
+    id
+    error
+  }
+}
+`
+
+// QueryBookEditions fetches editions for a given book, ordered by
+// popularity (users_count). Used by the add command so the user can
+// pick a specific edition.
+const QueryBookEditions = `
+query ($bookId: Int!, $limit: Int!) {
+  books_by_pk(id: $bookId) {
+    editions(
+      limit: $limit
+      order_by: { users_count: desc }
+    ) {
+      id
+      pages
+      edition_format
+      physical_format
+      release_year
+      title
+      isbn_13
+      isbn_10
+      users_count
+      publisher { name }
+      language { language }
+      reading_format { format }
+    }
+  }
+}
+`

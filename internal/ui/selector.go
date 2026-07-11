@@ -148,7 +148,7 @@ func (m selectorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m selectorModel) View() string {
 	if m.quitting {
-		return ""
+		return "\r\033[K"
 	}
 	return m.list.View()
 }
@@ -168,7 +168,7 @@ func SelectBook(ctx context.Context, books []api.UserBook, styles *Styles) (*api
 		return &b, nil
 	}
 	m := initialSelectorModel(books, styles)
-	p := tea.NewProgram(m, tea.WithContext(ctx), tea.WithOutput(stderrOrStdout()))
+	p := tea.NewProgram(m, tea.WithContext(ctx), tea.WithAltScreen(), tea.WithOutput(stderrOrStdout()))
 	finalModel, err := p.Run()
 	if err != nil {
 		return nil, fmt.Errorf("run selector: %w", err)

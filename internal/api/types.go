@@ -108,3 +108,30 @@ type SearchResults struct {
 type Search struct {
 	Results SearchResults `json:"results"`
 }
+
+// SearchResult is a decoded book from the catalog search.
+// Populated manually in decodeSearchHit — not unmarshaled from JSON.
+type SearchResult struct {
+	ID          string
+	Title       string
+	AuthorNames []string
+	Pages       *int
+	ReleaseYear *int
+	Rating      float64
+}
+
+// EditionResult is a decoded edition from the editions query.
+type EditionResult struct {
+	ID             int                       `json:"id"`
+	Pages          *int                      `json:"pages"`
+	EditionFormat  *string                   `json:"edition_format"`
+	PhysicalFormat *string                   `json:"physical_format"`
+	ReleaseYear    *int                      `json:"release_year"`
+	Title          *string                   `json:"title"`
+	ISBN13         *string                   `json:"isbn_13"`
+	ISBN10         *string                   `json:"isbn_10"`
+	UsersCount     int                       `json:"users_count"`
+	Publisher      *struct{ Name string }    `json:"publisher"`
+	Language       *struct{ Language string } `json:"language"`
+	ReadingFormat  *struct{ Format string }   `json:"reading_format"`
+}
