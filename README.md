@@ -2,27 +2,53 @@
 
 An unofficial command-line tool for managing your [Hardcover](https://hardcover.app) library — list books, log progress, check stats, track goals, and export your reading history.
 
-## Requirements
+## Installation
 
-- Go 1.25+ (or a pre-built binary)
-- A Hardcover API token
+### Homebrew (macOS/Linux)
 
-## Setup
+```bash
+brew install KIRKR101/tap/hardcover
+```
 
-Get an API token from [Hardcover's account settings](https://hardcover.app/account/api), then either:
+### Install script (macOS/Linux)
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/KIRKR101/hardcover-cli/main/install.sh | sh
+```
+
+Or with a specific version:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/KIRKR101/hardcover-cli/main/install.sh | sh -s -- v0.1.0
+```
+
+### Go install
 
 ```bash
 go install github.com/KIRKR101/hardcover-cli@latest
-hardcover setup
 ```
 
-…or build from source:
+Note: The binary will be named `hardcover-cli` when installed via `go install`. Run `hardcover-cli setup` instead of `hardcover setup`, or add an alias: `alias hardcover=hardcover-cli`. Add `$(go env GOPATH)/bin` to your `PATH` if needed.
+
+### Build from source
 
 ```bash
 git clone https://github.com/KIRKR101/hardcover-cli
 cd hardcover-cli
 go build -o hardcover .
 ./hardcover setup
+```
+
+## Requirements
+
+- A Hardcover API token
+
+## Setup
+
+Get an API token from [Hardcover's account settings](https://hardcover.app/account/api), then run:
+
+```bash
+hardcover setup
 ```
 
 The token is stored in `~/.hardcover.json` with `0600` permissions. Alternatively, set `HARDCOVER_TOKEN` and skip `setup`.
