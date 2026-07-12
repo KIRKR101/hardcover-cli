@@ -40,7 +40,6 @@ the search and edition pickers.`,
 	cmd.Flags().Int("limit", 10, "Max search results")
 	cmd.Flags().Int("edition-limit", 25, "Max editions to fetch")
 	cmd.Flags().Int("status", 0, "Reading status ID (required in non-interactive mode)")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 

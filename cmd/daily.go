@@ -24,7 +24,6 @@ func newDailyCmd() *cobra.Command {
 		RunE:  runDaily,
 	}
 	cmd.Flags().IntP("days", "d", 7, "Number of days to show")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -237,7 +236,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Reading Log (last %d days)", days)))
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Separator("─", 80))
 
 	totalAll := 0
 	for _, entry := range jsonResult {
@@ -286,7 +285,7 @@ func runDaily(cmd *cobra.Command, _ []string) error {
 	if len(jsonResult) > 0 {
 		avg = totalAll / len(jsonResult)
 	}
-	fmt.Fprintf(out, "\n%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "\n%s\n", styles.Separator("─", 80))
 	fmt.Fprintf(out, "%s %s over %s %s %s\n",
 		styles.Apply(styles.Bold, "Summary:"),
 		styles.Apply(styles.Green, fmt.Sprintf("%d pages", totalAll)),

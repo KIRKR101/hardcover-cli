@@ -147,12 +147,18 @@ var StatusShort = map[string]int{
 
 // PadRight pads s with spaces to width, ignoring ANSI.
 func PadRight(s string, width int) string {
-	return s + strings.Repeat(" ", max(0, width-visibleLen(s)))
+	return s + strings.Repeat(" ", max(0, width-VisibleWidth(s)))
 }
 
-// visibleLen returns the visible (non-ANSI) length of s.
-func visibleLen(s string) int {
-	n := 0
+// VisibleWidth returns the display width of s, stripping ANSI escapes
+// and counting CJK/wide characters as 2 columns.
+func VisibleWidth(s string) int {
+	return runewidth.StringWidth(StripANSI(s))
+}
+
+// StripANSI removes all ANSI escape sequences from s.
+func StripANSI(s string) string {
+	var out strings.Builder
 	inEscape := false
 	for _, r := range s {
 		if r == '\x1b' {
@@ -160,14 +166,14 @@ func visibleLen(s string) int {
 			continue
 		}
 		if inEscape {
-			if r == 'm' {
+			if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
 				inEscape = false
 			}
 			continue
 		}
-		n++
+		out.WriteRune(r)
 	}
-	return n
+	return out.String()
 }
 
 func clamp(v, lo, hi float64) float64 {
@@ -204,4 +210,14 @@ func (s *Styles) Success(msg string) string {
 // Bullet returns a cyan bullet point.
 func (s *Styles) Bullet() string {
 	return s.Apply(s.BCyan, "●")
+}
+
+// Separator returns a horizontal line of the given character,
+// sized to the terminal width (capped at maxWidth).
+func (s *Styles) Separator(ch string, maxWidth int) string {
+	w := TerminalWidth()
+	if w <= 0 || w > maxWidth {
+		w = maxWidth
+	}
+	return s.Apply(s.Dim, strings.Repeat(ch, w))
 }

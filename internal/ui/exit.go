@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/KIRKR101/hardcover-cli/internal/errs"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Exit codes used by the CLI. Returned via os.Exit at the entrypoint.
@@ -42,6 +43,11 @@ func Exit(err error) {
 	if err == nil {
 		os.Exit(ExitOK)
 	}
-	fmt.Fprintln(os.Stderr, "error: "+err.Error())
+	if HasColor(false) {
+		red := lipgloss.NewStyle().Foreground(lipgloss.Color("167")).Bold(true)
+		fmt.Fprintln(os.Stderr, red.Render("error:")+" "+err.Error())
+	} else {
+		fmt.Fprintln(os.Stderr, "error: "+err.Error())
+	}
 	os.Exit(ExitCodeFor(err))
 }

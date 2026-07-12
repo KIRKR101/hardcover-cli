@@ -24,7 +24,6 @@ func newLibraryCmd() *cobra.Command {
 	cmd.Flags().StringP("status", "s", "", "Filter by status (want, reading, read, paused, dnf, ignored)")
 	cmd.Flags().IntP("limit", "l", 25, "Max books to show")
 	cmd.Flags().IntP("offset", "o", 0, "Offset for pagination")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -111,7 +110,7 @@ func runLibrary(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-// tableColumn widths. Total = sum + 4 separators × 3 chars + 2 = ~.
+// tableColumn widths. 6 separators × 3 chars each = 18.
 const (
 	colIdx    = 4
 	colStatus = 20
@@ -120,6 +119,9 @@ const (
 	colAuth   = 22
 )
 
+// tableTotal is the visible width inside the box borders.
+const tableTotal = colIdx + colStatus + colRating + titleW + colAuth + (6 * 3)
+
 // renderLibraryTable prints a fixed-column table. Each row is built
 // from padded cells separated by dim " │ " markers; horizontal rules
 // are drawn with box-drawing characters. Simple and obvious layout.
@@ -127,10 +129,9 @@ func renderLibraryTable(out io.Writer, styles *ui.Styles, books []api.UserBook) 
 	dim := styles.Apply(styles.Dim, "")
 	bold := func(s string) string { return styles.Apply(styles.Bold, s) }
 	sep := dim + " │ "
-	total := colIdx + colStatus + colRating + titleW + colAuth + (3 * 4) // 4 separators
-	top := dim + "┌" + strings.Repeat("─", total) + "┐"
-	mid := dim + "├" + strings.Repeat("─", total) + "┤"
-	bot := dim + "└" + strings.Repeat("─", total) + "┘"
+	top := dim + "┌" + strings.Repeat("─", tableTotal) + "┐"
+	mid := dim + "├" + strings.Repeat("─", tableTotal) + "┤"
+	bot := dim + "└" + strings.Repeat("─", tableTotal) + "┘"
 
 	header := sep +
 		ui.PadRight(bold("#"), colIdx) + sep +

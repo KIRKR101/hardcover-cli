@@ -34,9 +34,7 @@ func NewRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// --no-color is a persistent flag; we read it on the root.
 			gf.noColor, _ = cmd.Flags().GetBool("no-color")
-			// json flag is per-subcommand; nothing to do globally here.
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -46,6 +44,8 @@ func NewRootCmd() *cobra.Command {
 
 	root.PersistentFlags().BoolVar(&gf.noColor, "no-color", false,
 		"Disable colored output (also respects NO_COLOR env var)")
+	root.PersistentFlags().Bool("json", false,
+		"Output raw JSON instead of formatted text")
 	root.SetVersionTemplate("hardcover {{.Version}}\n")
 
 	// Subcommands.

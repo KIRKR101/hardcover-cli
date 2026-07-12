@@ -20,7 +20,6 @@ func newStatsCmd() *cobra.Command {
 		Short: "Show reading statistics and active goals",
 		RunE:  runStats,
 	}
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -104,7 +103,8 @@ func runStats(cmd *cobra.Command, _ []string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Library Statistics: %s", me.Username)))
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "┌────────────────────────────────────────┐"))
+	boxInner := statsInnerWidth
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "┌"+strings.Repeat("─", boxInner)+"┐"))
 
 	type stat struct {
 		label string
@@ -120,13 +120,13 @@ func runStats(cmd *cobra.Command, _ []string) error {
 		{"Total pages read", fmt.Sprintf("%d", totalPages), &styles.Bold},
 	}
 	for _, s := range stats {
-		dots := 38 - len(s.label) - len(s.value)
-		if dots < 1 {
-			dots = 1
-		}
 		val := s.value
 		if s.style != nil {
 			val = styles.Apply(*s.style, val)
+		}
+		dots := boxInner - 4 - ui.VisibleWidth(s.label) - ui.VisibleWidth(val)
+		if dots < 1 {
+			dots = 1
 		}
 		fmt.Fprintf(out, "%s  %s %s%s %s\n",
 			styles.Apply(styles.Dim, "│"),
@@ -138,7 +138,9 @@ func runStats(cmd *cobra.Command, _ []string) error {
 	}
 
 	if ratedCount > 0 {
-		dots := 38 - len("Avg rating") - len(fmt.Sprintf("★ %.2f (%d rated)", avgRating, ratedCount)) - 2
+		ratingVal := styles.Apply(styles.BYellow, fmt.Sprintf("★ %.2f", avgRating)) +
+			" " + styles.Apply(styles.Dim, fmt.Sprintf("(%d rated)", ratedCount))
+		dots := boxInner - 4 - ui.VisibleWidth("Avg rating") - ui.VisibleWidth(ratingVal)
 		if dots < 1 {
 			dots = 1
 		}
@@ -146,17 +148,16 @@ func runStats(cmd *cobra.Command, _ []string) error {
 			styles.Apply(styles.Dim, "│"),
 			"Avg rating",
 			styles.Apply(styles.Dim, strings.Repeat(".", dots)),
-			styles.Apply(styles.BYellow, fmt.Sprintf("★ %.2f", avgRating))+
-				" "+styles.Apply(styles.Dim, fmt.Sprintf("(%d rated)", ratedCount)),
+			ratingVal,
 			styles.Apply(styles.Dim, "│"),
 		)
 	}
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "└────────────────────────────────────────┘"))
+	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "└"+strings.Repeat("─", boxInner)+"┘"))
 	fmt.Fprintln(out)
 
 	if len(goals) > 0 {
 		fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, "Active Goals"))
-		fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "──────────────────────────────────────────"))
+		fmt.Fprintf(out, "%s\n", styles.Separator("─", 42))
 		for _, g := range goals {
 			pct := 0.0
 			if g.Goal > 0 {
@@ -260,3 +261,6 @@ func titleCase(s string) string {
 	}
 	return strings.Join(parts, " ")
 }
+
+// statsInnerWidth is the inner content width for the stats box.
+const statsInnerWidth = 38

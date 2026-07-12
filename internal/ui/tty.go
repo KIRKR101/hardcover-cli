@@ -39,3 +39,13 @@ func ShouldSpinner(jsonMode bool) bool {
 	return isatty(os.Stderr)
 }
 
+// TerminalWidth returns the width of the terminal in columns.
+// Returns 0 if the width cannot be determined.
+func TerminalWidth() int {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		return 0
+	}
+	return w
+}
+

@@ -20,7 +20,6 @@ func newGoalsCmd() *cobra.Command {
 		RunE:  runGoals,
 	}
 	cmd.Flags().Bool("all", false, "Include archived goals")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -75,7 +74,7 @@ func runGoals(cmd *cobra.Command, _ []string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, "Reading Goals"))
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Separator("─", 60))
 
 	for _, g := range goals {
 		pct := 0.0

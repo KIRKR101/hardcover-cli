@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/KIRKR101/hardcover-cli/internal/api"
 	"github.com/KIRKR101/hardcover-cli/internal/config"
@@ -19,7 +20,6 @@ func newWhoamiCmd() *cobra.Command {
 		Short: "Show current user info",
 		RunE:  runWhoami,
 	}
-	cmd.Flags().Bool("json", false, "Output raw JSON instead of formatted text")
 	return cmd
 }
 
@@ -59,20 +59,26 @@ func runWhoami(cmd *cobra.Command, _ []string) error {
 	// Formatted output.
 	fmt.Fprintln(cmd.OutOrStdout())
 	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Title, "Hardcover Profile"))
-	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Dim, "┌──────────────────────────────────────┐"))
-	fmt.Fprintf(cmd.OutOrStdout(),
-		"  %s : %s\n",
-		styles.Apply(styles.Bold, "Username"),
-		user.Username)
-	fmt.Fprintf(cmd.OutOrStdout(),
-		"  %s       : %d\n",
-		styles.Apply(styles.Bold, "ID"),
-		user.ID)
-	fmt.Fprintf(cmd.OutOrStdout(),
-		"  %s    : %s\n",
-		styles.Apply(styles.Bold, "Books"),
-		styles.Apply(styles.BGreen, fmt.Sprintf("%d", user.BooksCount)))
-	fmt.Fprintln(cmd.OutOrStdout(), styles.Apply(styles.Dim, "└──────────────────────────────────────┘"))
+
+	username := user.Username
+	idStr := fmt.Sprintf("%d", user.ID)
+	booksStr := fmt.Sprintf("%d", user.BooksCount)
+
+	// Compute dynamic box width using styled rows so the border aligns exactly.
+	styledUser := styles.Apply(styles.Bold, "Username")
+	styledID := styles.Apply(styles.Bold, "ID")
+	styledBooks := styles.Apply(styles.Bold, "Books")
+	row1 := "  " + styledUser + " : " + username
+	row2 := "  " + styledID + "       : " + idStr
+	row3 := "  " + styledBooks + "    : " + styles.Apply(styles.BGreen, booksStr)
+	boxInner := max(ui.VisibleWidth(row1), ui.VisibleWidth(row2), ui.VisibleWidth(row3))
+
+	dim := styles.Apply(styles.Dim, "")
+	fmt.Fprintln(cmd.OutOrStdout(), dim+"┌"+strings.Repeat("─", boxInner)+"┐")
+	fmt.Fprintln(cmd.OutOrStdout(), row1)
+	fmt.Fprintln(cmd.OutOrStdout(), row2)
+	fmt.Fprintln(cmd.OutOrStdout(), row3)
+	fmt.Fprintln(cmd.OutOrStdout(), dim+"└"+strings.Repeat("─", boxInner)+"┘")
 	fmt.Fprintln(cmd.OutOrStdout())
 	return nil
 }

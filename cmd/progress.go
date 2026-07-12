@@ -18,7 +18,6 @@ func newProgressCmd() *cobra.Command {
 		Short: "Show progress for books currently being read",
 		RunE:  runProgress,
 	}
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -68,7 +67,7 @@ func runProgress(cmd *cobra.Command, _ []string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Currently Reading (%d)", len(books))))
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Separator("─", 56))
 
 	for _, ub := range books {
 		book := ub.Book

@@ -21,7 +21,6 @@ func newSearchCmd() *cobra.Command {
 		RunE:  runSearch,
 	}
 	cmd.Flags().IntP("limit", "l", 10, "Max results")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
@@ -70,7 +69,7 @@ func runSearch(cmd *cobra.Command, args []string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Title, fmt.Sprintf("Search Results for %q", query)))
-	fmt.Fprintf(out, "%s\n", styles.Apply(styles.Dim, "────────────────────────────────────────────────────────────────────────"))
+	fmt.Fprintf(out, "%s\n", styles.Separator("─", 76))
 
 	for i, hit := range hits {
 		r := decodeHit(hit)

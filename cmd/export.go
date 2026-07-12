@@ -25,7 +25,6 @@ func newExportCmd() *cobra.Command {
 		RunE:  runExport,
 	}
 	cmd.Flags().StringP("output", "o", "hardcover_export.csv", "Output CSV file")
-	cmd.Flags().Bool("json", false, "Output raw JSON to stdout instead of writing CSV")
 	return cmd
 }
 
@@ -227,9 +226,13 @@ func runExport(cmd *cobra.Command, _ []string) error {
 			bookNames = append(bookNames, k)
 		}
 		slices.Sort(bookNames)
-		for _, b := range bookNames {
+		for i, b := range bookNames {
+			tree := "├─"
+			if i == len(bookNames)-1 {
+				tree = "└─"
+			}
 			fmt.Fprintf(out, "    %s %s: %dp\n",
-				styles.Apply(styles.Dim, "├─"),
+				styles.Apply(styles.Dim, tree),
 				b, books[b],
 			)
 		}

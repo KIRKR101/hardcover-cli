@@ -40,7 +40,6 @@ Provide at least one of: --pages, --percent, --status, --rating.`,
 	cmd.Flags().Float64("percent", -1, "Log as percentage of total pages (0-100)")
 	cmd.Flags().String("status", "", "Update status (want, reading, read, paused, dnf, ignored)")
 	cmd.Flags().Float64("rating", -1, "Rate the book (0-5, supports halves)")
-	cmd.Flags().Bool("json", false, "Output raw JSON")
 	return cmd
 }
 
