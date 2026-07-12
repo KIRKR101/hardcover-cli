@@ -16,7 +16,6 @@ OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 case "$OS" in
   linux)  OS="linux" ;;
   darwin) OS="darwin" ;;
-  msys*|mingw*|cygwin*) OS="windows" ;;
   *) echo "Unsupported OS: $OS"; exit 1 ;;
 esac
 
@@ -40,14 +39,7 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-# Determine archive format
-if [ "$OS" = "windows" ]; then
-  EXT="zip"
-else
-  EXT="tar.gz"
-fi
-
-ARCHIVE="${REPO##*/}_${VERSION#v}_${OS}_${ARCH}.${EXT}"
+ARCHIVE="${REPO##*/}_${VERSION#v}_${OS}_${ARCH}.tar.gz"
 URL="https://github.com/$REPO/releases/download/$VERSION/$ARCHIVE"
 
 echo "Installing $BINARY $VERSION for $OS/$ARCH..."
@@ -83,11 +75,7 @@ if curl -sSfL "$CHECKSUM_URL" -o checksums.txt 2>/dev/null; then
 fi
 
 # Extract
-if [ "$EXT" = "zip" ]; then
-  unzip -q "$ARCHIVE"
-else
-  tar -xzf "$ARCHIVE"
-fi
+tar -xzf "$ARCHIVE"
 
 # Install
 if [ -w "$INSTALL_DIR" ]; then

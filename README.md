@@ -6,6 +6,12 @@ An unofficial command-line tool for managing your [Hardcover](https://hardcover.
 
 ### Homebrew (macOS/Linux)
 
+On first use, you may need to trust the tap:
+
+```bash
+brew trust KIRKR101/tap
+```
+
 ```bash
 brew install KIRKR101/tap/hardcover
 ```
@@ -21,6 +27,10 @@ Or with a specific version:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/KIRKR101/hardcover-cli/main/install.sh | sh -s -- v0.1.0
 ```
+
+### Windows Install
+
+Download the appropriate binary from the [releases page](https://github.com/KIRKR101/hardcover-cli/releases).
 
 ### Go install
 
@@ -62,6 +72,7 @@ The token is stored in `~/.hardcover.json` with `0600` permissions. Alternativel
 | `hardcover stats` | Show reading statistics and active goals |
 | `hardcover progress` | Show current reading progress |
 | `hardcover search <query> [-l limit]` | Search for books on Hardcover |
+| `hardcover add [query] [--id id] [-l limit]` | Add a book to your library from the catalog |
 | `hardcover goals [--all]` | Show reading goals |
 | `hardcover log [book] [--id id] [--pages n] [--percent n] [--status s] [--rating r]` | Log progress, status, or rating |
 | `hardcover export [-o file]` | Export reading journal to CSV |
@@ -122,4 +133,3 @@ hardcover library --status read --json | jq '.[].book.title'
 
 - Config: `~/.hardcover.json`
 - API: `https://api.hardcover.app/v1/graphql`
-- Ctrl-C cancels in-flight HTTP requests, not just the UI.

@@ -7,6 +7,7 @@
 *.test
 *.out
 /hardcover
+/hardcover-cli
 
 # Editor / OS
 .vscode/
@@ -16,3 +17,9 @@ Thumbs.db
 
 # Dev tooling
 .tools/
+
+# GoReleaser output
+dist/
+
+# Release docs (internal)
+RELEASE.md
