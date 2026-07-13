@@ -282,6 +282,7 @@ query ($userBookId: Int!) {
     limit: 1
   ) {
     id
+    progress_pages
   }
 }
 `

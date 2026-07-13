@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/KIRKR101/hardcover-cli/internal/api"
@@ -22,7 +23,10 @@ func newLogCmd() *cobra.Command {
 use --id to target a specific user_book by id. If multiple books
 match the title, an interactive picker is launched in TTY mode.
 
-Provide at least one of: --pages, --percent, --status, --rating.`,
+Provide at least one of: --pages, --percent, --status, --rating.
+
+Use --pages with a + prefix (e.g. +20) to add pages to your current
+progress instead of setting an absolute page count.`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			id, _ := cmd.Flags().GetInt("id")
 			if id == 0 && len(args) == 0 {
@@ -36,7 +40,7 @@ Provide at least one of: --pages, --percent, --status, --rating.`,
 		RunE: runLog,
 	}
 	cmd.Flags().Int("id", 0, "user_book id (skips title search)")
-	cmd.Flags().Int("pages", 0, "Log cumulative pages read")
+	cmd.Flags().String("pages", "", "Log pages read (absolute, or +N to add to current progress)")
 	cmd.Flags().Float64("percent", -1, "Log as percentage of total pages (0-100)")
 	cmd.Flags().String("status", "", "Update status (want, reading, read, paused, dnf, ignored)")
 	cmd.Flags().Float64("rating", -1, "Rate the book (0-5, supports halves)")
@@ -58,10 +62,30 @@ func runLog(cmd *cobra.Command, args []string) error {
 	jsonMode := jsonFromCmd(cmd)
 
 	idFlag, _ := cmd.Flags().GetInt("id")
-	pages, _ := cmd.Flags().GetInt("pages")
+	pagesStr, _ := cmd.Flags().GetString("pages")
 	percent, _ := cmd.Flags().GetFloat64("percent")
 	statusArg, _ := cmd.Flags().GetString("status")
 	rating, _ := cmd.Flags().GetFloat64("rating")
+
+	var pages int
+	var isRelative bool
+
+	if pagesStr != "" {
+		if strings.HasPrefix(pagesStr, "+") {
+			n, err := strconv.Atoi(pagesStr[1:])
+			if err != nil || n < 0 {
+				return fmt.Errorf("--pages +N requires a non-negative integer: %w", errs.ErrInvalid)
+			}
+			pages = n
+			isRelative = true
+		} else {
+			n, err := strconv.Atoi(pagesStr)
+			if err != nil || n < 0 {
+				return fmt.Errorf("--pages must be a non-negative integer or +N: %w", errs.ErrInvalid)
+			}
+			pages = n
+		}
+	}
 
 	// Validate inputs.
 	if percent >= 0 && !(percent <= 100) {
@@ -70,13 +94,10 @@ func runLog(cmd *cobra.Command, args []string) error {
 	if rating >= 0 && !(rating <= 5) {
 		return fmt.Errorf("--rating must be between 0 and 5: %w", errs.ErrInvalid)
 	}
-	if pages < 0 {
-		return fmt.Errorf("--pages cannot be negative: %w", errs.ErrInvalid)
-	}
-	if pages == 0 && percent < 0 && statusArg == "" && rating < 0 {
+	if pagesStr == "" && percent < 0 && statusArg == "" && rating < 0 {
 		return fmt.Errorf("nothing to log. Use --pages, --percent, --status, or --rating: %w", errs.ErrInvalid)
 	}
-	pagesSet := pages > 0 || percent >= 0
+	pagesSet := pagesStr != "" || percent >= 0
 	hasStatus := statusArg != ""
 	hasRating := rating >= 0
 
@@ -225,7 +246,8 @@ func runLog(cmd *cobra.Command, args []string) error {
 		// Fetch the active read, update or insert.
 		var readResp struct {
 			UserBookReads []struct {
-				ID int `json:"id"`
+				ID            int `json:"id"`
+				ProgressPages int `json:"progress_pages"`
 			} `json:"user_book_reads"`
 		}
 		err = ui.WithSpinner(ctx, jsonMode, func(ctx context.Context) error {
@@ -236,6 +258,15 @@ func runLog(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
+
+		currentProgress := 0
+		if len(readResp.UserBookReads) > 0 {
+			currentProgress = readResp.UserBookReads[0].ProgressPages
+		}
+		if isRelative {
+			pages = currentProgress + pages
+		}
+
 		readInput := map[string]any{"progress_pages": pages}
 		if editionID != nil {
 			readInput["edition_id"] = *editionID
