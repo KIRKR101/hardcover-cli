@@ -10,7 +10,7 @@ import (
 )
 
 // Version is the CLI version, set via -ldflags at build time.
-var Version = "dev"
+var Version = "v0.2.0"
 
 // Global flags shared across subcommands.
 var gf struct {
