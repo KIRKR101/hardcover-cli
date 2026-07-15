@@ -182,6 +182,9 @@ func runLibrary(cmd *cobra.Command, _ []string) error {
 	}
 
 	sort.Slice(allBooks, func(i, j int) bool {
+		if allBooks[i].StatusID != allBooks[j].StatusID {
+			return allBooks[i].StatusID < allBooks[j].StatusID
+		}
 		return allBooks[i].DateAdded > allBooks[j].DateAdded
 	})
 
