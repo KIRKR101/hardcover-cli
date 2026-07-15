@@ -33,6 +33,8 @@ shared machines; it'll land in your shell history.`,
 				fmt.Fprintln(cmd.ErrOrStderr(),
 					"warning: passing the token as an argument may leave it in your shell history.")
 			} else {
+				fmt.Fprintln(cmd.OutOrStdout(),
+					"Get your API key from https://hardcover.app/account/api")
 				t, err := config.PromptToken()
 				if err != nil {
 					return err
